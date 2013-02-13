@@ -1,0 +1,5 @@
+D:\Coding\Profol\Profol\bin\Debug\Profol.exe
+D:\Coding\Profol\Profol\bin\Debug\Profol.pdb
+D:\Coding\Profol\Profol\obj\x86\Debug\ResolveAssemblyReference.cache
+D:\Coding\Profol\Profol\obj\x86\Debug\Profol.exe
+D:\Coding\Profol\Profol\obj\x86\Debug\Profol.pdb

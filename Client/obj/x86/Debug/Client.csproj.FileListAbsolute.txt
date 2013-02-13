@@ -1,0 +1,5 @@
+D:\Coding\Profol\Client\bin\Debug\Client.exe
+D:\Coding\Profol\Client\bin\Debug\Client.pdb
+D:\Coding\Profol\Client\obj\x86\Debug\ResolveAssemblyReference.cache
+D:\Coding\Profol\Client\obj\x86\Debug\Client.exe
+D:\Coding\Profol\Client\obj\x86\Debug\Client.pdb
