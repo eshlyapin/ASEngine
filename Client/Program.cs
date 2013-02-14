@@ -10,64 +10,115 @@ using System.IO;
 
 namespace Client
 {
-    class User
+    class Client
     {
-        public int x, y;
-        public string name;
+        public string Name;
+        public float x = 0;
+        public float y = 0;
+
+        public Client(string name, float x, float y)
+        {
+            Name = name;
+            this.x = x;
+            this.y = y;
+        }
         public override string ToString()
         {
-            return name + " position{ " + x + ", " + y + " }";
+            return Name + " position{ " + x + ", " + y + " }";
+        }
+
+        public static bool operator ==(Client left, Client right)
+        {
+            return left.Name == right.Name;
+        }
+
+        public static bool operator !=(Client left, Client right)
+        {
+            return !(left == right);
         }
     }
+
     class Program
     {
-        static List<User> users = new List<User>();
+        static List<Client> _clientList = new List<Client>();
 
         static void Main(string[] args)
         {
-            Random rnd = new Random();
-            TcpClient client = new TcpClient();
-            client.Connect("127.0.0.1", 1234);
-            Stream stream = client.GetStream();
+            TcpClient socket = new TcpClient();
+            try
+            {
+                socket.Connect("127.0.0.1", 1234);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
-            string userName = "Bot #" + rnd.Next();
+            Random rnd = new Random(DateTime.Now.Second);
+            Client me = new Client("bot #" + rnd.Next(0,15), (float)rnd.NextDouble(), (float)rnd.NextDouble());
 
-            StreamWriter wStream = new StreamWriter(stream);
-            wStream.Write(userName.Length);
-            wStream.Write(userName);
+            Program prg = new Program();
+            prg.Login(me, socket.GetStream());
 
-            int x = rnd.Next();
-            int y = rnd.Next();
-
+            Console.WriteLine(me.ToString());
 
             while (true)
             {
-                wStream.Write(x);
-                wStream.Write(y);
+                prg.WriteToStream(me, socket.GetStream());
+                prg.ReadFromStream(socket.GetStream());
 
-                User nu = new User();
-                byte[] buffer = new byte[8];
-                stream.Read(buffer, 0, 8);
-                nu.x = BitConverter.ToInt32(buffer, 0);
-                nu.y = BitConverter.ToInt32(buffer, 3);
-
-                stream.Read(buffer, 0, 4);
-                int len = BitConverter.ToInt32(buffer,0);
-                byte[] str = new byte[BitConverter.ToInt32(buffer, 0)];
-                stream.Read(str, 0, len);
-                nu.name = BitConverter.ToString(str, 0);
-
-                bool needToAdd = true;
                 Console.Clear();
-                for (int i = 0; i < users.Count; ++i)
+                foreach (var client in _clientList)
                 {
-                    if (nu.name == users[i].name)
-                        needToAdd = false;
-                    Console.WriteLine(users[i].ToString());
+                    Console.WriteLine(client.ToString());
                 }
-                if (needToAdd)
-                    users.Add(nu);
             }            
+        }
+
+        public void Login(Client client, Stream stream)
+        {
+            BinaryWriter writer = new BinaryWriter(stream);
+            writer.Write(client.Name);
+        }
+
+        public void WriteToStream(Client client, Stream stream)
+        {
+            BinaryWriter writer = new BinaryWriter(stream);
+            writer.Write(client.x);
+            writer.Write(client.y);
+        }
+
+        public void ReadFromStream(Stream stream)
+        {
+            Console.WriteLine("Waiting info about other users");
+            BinaryReader reader = new BinaryReader(stream);
+            string name = reader.ReadString();
+            float x = reader.ReadSingle();
+            float y = reader.ReadSingle();
+
+            if (isNewClient(name))
+            {
+                _clientList.Add(new Client(name, x, y));
+            }
+            else
+            {
+                var clients = from s in _clientList where (s.Name == name) select s;
+                foreach (var client in clients)
+                {
+                    client.x = x;
+                    client.y = y;
+                }
+            }
+        }
+
+        public bool isNewClient(string name)
+        {
+            foreach (var other in _clientList)
+            {
+                if (other.Name == name)
+                    return false;
+            }
+            return true;
         }
     }
 }
