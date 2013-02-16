@@ -55,70 +55,28 @@ namespace Client
             }
 
             Random rnd = new Random(DateTime.Now.Second);
-            Client me = new Client("bot #" + rnd.Next(0,15), (float)rnd.NextDouble(), (float)rnd.NextDouble());
 
-            Program prg = new Program();
-            prg.Login(me, socket.GetStream());
-
-            Console.WriteLine(me.ToString());
-
+            int i = 0;
             while (true)
             {
-                prg.WriteToStream(me, socket.GetStream());
-                prg.ReadFromStream(socket.GetStream());
+                i++;
+                byte[] buffer = new byte[9];
+                rnd.NextBytes(buffer);
+                socket.GetStream().Write(buffer, 0, buffer.Length);
 
-                Console.Clear();
-                foreach (var client in _clientList)
+
+                if (Console.KeyAvailable == true)
                 {
-                    Console.WriteLine(client.ToString());
+                    Console.WriteLine("Sended bytes: " + i * 9);
+
+                    foreach (var a in buffer)
+                        Console.Write(a + " ");
+
+                    Console.Read();
+                    socket.Close();
                 }
-            }            
-        }
-
-        public void Login(Client client, Stream stream)
-        {
-            BinaryWriter writer = new BinaryWriter(stream);
-            writer.Write(client.Name);
-        }
-
-        public void WriteToStream(Client client, Stream stream)
-        {
-            BinaryWriter writer = new BinaryWriter(stream);
-            writer.Write(client.x);
-            writer.Write(client.y);
-        }
-
-        public void ReadFromStream(Stream stream)
-        {
-            Console.WriteLine("Waiting info about other users");
-            BinaryReader reader = new BinaryReader(stream);
-            string name = reader.ReadString();
-            float x = reader.ReadSingle();
-            float y = reader.ReadSingle();
-
-            if (isNewClient(name))
-            {
-                _clientList.Add(new Client(name, x, y));
-            }
-            else
-            {
-                var clients = from s in _clientList where (s.Name == name) select s;
-                foreach (var client in clients)
-                {
-                    client.x = x;
-                    client.y = y;
-                }
-            }
-        }
-
-        public bool isNewClient(string name)
-        {
-            foreach (var other in _clientList)
-            {
-                if (other.Name == name)
-                    return false;
-            }
-            return true;
+                //Console.Read();//Thread.Sleep(500);
+            }  
         }
     }
 }
