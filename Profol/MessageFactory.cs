@@ -7,14 +7,15 @@ namespace Profol
 {
     class MessageFactory
     {
-        public static Message CreateMessage(MessageHeader header)
+        public static Message CreateMessage(MessageHeader header, byte[] buffer)
         {
             switch (header.PacketType)
             {
                 case 1: // login
-                    return new MessageLogin(header);
+                    return new MessageLogin(header, buffer);
                 default:
-                    return new Message(null);
+                    throw new ArgumentException("Illegal message type");
+                    return null;
             }
         }
     }

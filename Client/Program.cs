@@ -12,60 +12,38 @@ namespace Client
 {
     class Program
     {
-        static void SendMessage(Stream stream, string type)
+        static void ExecFlood(Stream stream)
         {
             Random rnd = new Random();
-            Thread.Sleep(50);
-            byte[] mbuf;
-
-            if (type == "m1")
-            {
-                mbuf = new byte[6];
-                rnd.NextBytes(mbuf);
-                mbuf[0] = 1;
-            }
-            else if (type == "m2")
-            {
-                mbuf = new byte[11];
-                rnd.NextBytes(mbuf);
-                mbuf[0] = 2;
-            }
-            else if (type == "m3")
-            {
-                mbuf = new byte[16];
-                rnd.NextBytes(mbuf);
-                mbuf[0] = 3;
-            }
-            else if (type == "login")
-            {
-                string login = "eshlyapin";
-                string pswd = "ololo";
-
-                MemoryStream ms = new MemoryStream();
-                BinaryWriter bs = new BinaryWriter(ms);
-                bs.Write((byte)1);
-                bs.Write(login.Length + pswd.Length + 2);
-                bs.Write(login);
-                bs.Write(pswd);
-                mbuf = ms.ToArray();
-            }
-            else
-            {
-                mbuf = new byte[rnd.Next(1, 20)];
-                rnd.NextBytes(mbuf);
-                mbuf[0] = (byte)rnd.Next(1, 7);
-            }
+            byte[] buffer = new byte[rnd.Next(1,4)];
+            rnd.NextBytes(buffer);
             try
             {
-                stream.Write(mbuf, 0, mbuf.Length);
-                Console.Write("TYPE:" + mbuf[0]);
-                Console.Write(" DATA: ");
-                for (int i = 1; i < mbuf.Length; ++i)
-                {
-                    Console.Write(mbuf[i] + " ");
-                }
-                Console.WriteLine();
-                
+                stream.Write(buffer, 0, buffer.Length);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            foreach (var b in buffer)
+                Console.Write(b + " ");
+            Console.WriteLine();
+        }
+
+        static void ExecLogin(Stream stream, string username, string password)
+        {
+            try
+            {
+                byte[] buffer = new byte[sizeof(byte) + sizeof(uint) + username.Length + password.Length + 2];
+                MemoryStream memStream = new MemoryStream(buffer);
+                BinaryWriter writer = new BinaryWriter(memStream);
+                writer.Write((byte)1);
+                writer.Write((uint)buffer.Length - 5);
+                writer.Write(username);
+                writer.Write(password);
+                stream.Write(buffer, 0, buffer.Length);
+
             }
             catch (System.Exception ex)
             {
@@ -77,10 +55,14 @@ namespace Client
         static void Main(string[] args)
         {
             TcpClient socket = new TcpClient();
+            
+            Console.WriteLine("Enter host ip:");
+            string ip = Console.ReadLine();
+            if (ip == "")
+                ip = "127.0.0.1";
+
             try
             {
-                Console.WriteLine("Enter host ip:");
-                string ip = Console.ReadLine();
                 socket.Connect(ip, 30000);
             }
             catch(Exception ex)
@@ -91,42 +73,62 @@ namespace Client
             }
 
             Random rnd = new Random(DateTime.Now.Second);
-
-            Console.WriteLine("Client application for testing");
-            Console.WriteLine("send command description:\n\t");
-            Console.WriteLine("send <message type> [ -r <repeat> ]");
-            Console.WriteLine("message types: m1, m2, m3");
-            Console.WriteLine("if message type is illegal, random data will be sent");
+            
+            string prevCommand = "";
+            Console.WriteLine("Available commands:");
+            Console.WriteLine("login-fake");
+            Console.WriteLine("login-user");
+            Console.WriteLine("flood");
+            Console.WriteLine("reconnect");
+            Console.WriteLine("repeat");
+            Console.WriteLine();
             while (true)
             {
-                string line = Console.ReadLine();
-                string[] command = line.Split(' ');
-                if (command.Length > 1)
+                Console.Write(">");
+                string command = Console.ReadLine();
+                if (command == "repeat")
                 {
-                    if (command[0] == "send")
+                    Console.Write("count: ");
+                    string sCount = Console.ReadLine();
+                    int count = Convert.ToInt32(sCount);
+                    for (int i = 0; i < count; ++i)
+                        Exec(socket.GetStream(), prevCommand);
+                }
+                else if (command == "reconnect")
+                {
+                    socket.Close();
+                    socket = new TcpClient();
+                    try
                     {
-                        SendMessage(socket.GetStream(), command[1]);
-                        if (command.Length > 3)
-                        {
-                            if (command[2] == "-r")
-                            {
-                                try
-                                {
-                                    int count = Convert.ToInt32(command[3]);
-                                    for (int i = 0; i < count - 1; ++i)
-                                    {
-                                        SendMessage(socket.GetStream(), command[1]);
-                                    }
-                                }
-                                catch (System.Exception ex)
-                                {
-                                    Console.WriteLine("invalid format");
-                                }
-                            }
-                        }
+                        socket.Connect(ip, 30000);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
                     }
                 }
+                else
+                {
+                    Exec(socket.GetStream(), command);
+                }
+                prevCommand = command;
             }  
+        }
+
+        static void Exec(Stream stream, string command)
+        {
+            if (command == "flood")
+                ExecFlood(stream);
+            if (command == "login-fake")
+                ExecLogin(stream, "ololoev", "123456");
+            if (command == "login-user")
+            {
+                Console.Write("User: ");
+                string name = Console.ReadLine();
+                Console.Write("Password: ");
+                string pass = Console.ReadLine();
+                ExecLogin(stream, name, pass);
+            }
         }
     }
 }

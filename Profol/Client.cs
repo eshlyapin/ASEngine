@@ -9,83 +9,55 @@ using System.IO;
 
 namespace Profol
 {
-
-
     class Client
     {
-        public TcpClient Socket { get; protected set; }
-
         public Queue<Message> messages = new Queue<Message>();
+
+        AsyncReader reader;
 
         public Client(TcpClient socket)
         {
-            Socket = socket;
-            StartRead();
+            reader = new AsyncReader(socket);
+            ReadNewPacket();
         }
 
-        public void StartRead()
+        void ReadNewPacket()
         {
-            Stream stream = Socket.GetStream();
-            byte[] buffer = new byte[sizeof(byte) + sizeof(uint)];
-
-            stream.BeginRead(buffer, 0, buffer.Length, new AsyncCallback(ReadHeaderCallback), buffer);
+            byte[] headerBuffer = new byte[MessageHeader.HeaderSize];
+            reader.BeginRead(headerBuffer, new MessageHandler(OnHeaderRead), null);
         }
 
 
-        void ReadHeaderCallback(IAsyncResult result)
+        void OnHeaderRead(byte[] buffer, object state)
         {
-            byte[] buffer = (byte[])result.AsyncState;
-            Stream stream = Socket.GetStream();
-
             try
             {
-                int bytesRead = stream.EndRead(result);
-                if (bytesRead == buffer.Length)
-                {
-                    Message message = MessageFactory.CreateMessage(new MessageHeader(buffer));
-                    Console.WriteLine(message);
-
-                }
-                else if(bytesRead < buffer.Length)
-                {
-                    stream.BeginRead(buffer, bytesRead, buffer.Length - bytesRead, new AsyncCallback(ReadHeaderCallback), buffer);
-                }
-                
+                MessageHeader header = new MessageHeader((byte[])buffer);
+                byte[] bodyBuffer = new byte[header.PacketSize];
+                reader.BeginRead(bodyBuffer, OnBodyRead, header);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                Console.WriteLine("PIZDEC:");
-                Console.WriteLine(ex.Message);            	
+                Console.WriteLine("Client should be disconected: " + ex.Message);
+                reader._tcpSocet.Close();
             }
         }
 
-        void ReadBodyCallback(IAsyncResult result)
+        void OnBodyRead(byte[] buffer, object state)
         {
-            /*Message message = (Message)result.AsyncState;
-            Stream stream = Socket.GetStream();
             try
             {
-                int bytesRead = stream.EndRead(result);
-
-                if (bytesRead == message._buffer.Length)
-                {
-                    lock(messages)
-                        messages.Enqueue(message);
-                    Console.WriteLine("Packet was successfully received.");
-                    Console.WriteLine(message);
-
-                    StartRead();
-                }
-                else
-                {
-                    stream.BeginRead(message.buffer, bytesRead, message.buffer.Length - bytesRead, new AsyncCallback(ReadBodyCallback), message);
-                }
+                Message message = MessageFactory.CreateMessage((MessageHeader)state, buffer);
+                messages.Enqueue(message);
+                Console.WriteLine("Message Recieved:");
+                Console.WriteLine(message);
+                ReadNewPacket();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Console.WriteLine("PIZDEC:");
-                Console.WriteLine(ex.Message);
-            }*/
+                Console.WriteLine("Client should be disconected: " + ex.Message);
+                reader._tcpSocet.Close();
+            }
         }
     }
 }
