@@ -9,60 +9,83 @@ using System.IO;
 
 namespace Profol
 {
-    class Packet
-    {
-        byte[] buffer;
-        public Packet()
-        {
-            buffer = new byte[1];
 
-        }
-    }
 
     class Client
     {
         public TcpClient Socket { get; protected set; }
 
+        public Queue<Message> messages = new Queue<Message>();
+
         public Client(TcpClient socket)
         {
             Socket = socket;
-            Socket.GetStream().BeginRead(buffer, 0, buffer.Length, new AsyncCallback(ReadCallback), Socket.GetStream());
+            StartRead();
+        }
+
+        public void StartRead()
+        {
+            Stream stream = Socket.GetStream();
+            byte[] buffer = new byte[sizeof(byte) + sizeof(uint)];
+
+            stream.BeginRead(buffer, 0, buffer.Length, new AsyncCallback(ReadHeaderCallback), buffer);
         }
 
 
-        byte[] buffer = new byte[3];
-        int offset = 0;
-
-        void ReadCallback(IAsyncResult result)
+        void ReadHeaderCallback(IAsyncResult result)
         {
-            Stream stream = (Stream)result.AsyncState;
-            //using "using" will destroy the stream...
-            //Dispose should be call only when conection was last.
-            //using (Stream stream = (Stream)result.AsyncState)
+            byte[] buffer = (byte[])result.AsyncState;
+            Stream stream = Socket.GetStream();
+
             try
             {
                 int bytesRead = stream.EndRead(result);
-                offset += bytesRead;
-
-                if (bytesRead > 0)
+                if (bytesRead == buffer.Length)
                 {
-                    if (offset >= buffer.Length)
-                        offset = 0;
-                    stream.BeginRead(buffer, offset, buffer.Length - offset, new AsyncCallback(ReadCallback), stream);
+                    Message message = MessageFactory.CreateMessage(new MessageHeader(buffer));
+                    Console.WriteLine(message);
+
+                }
+                else if(bytesRead < buffer.Length)
+                {
+                    stream.BeginRead(buffer, bytesRead, buffer.Length - bytesRead, new AsyncCallback(ReadHeaderCallback), buffer);
+                }
+                
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine("PIZDEC:");
+                Console.WriteLine(ex.Message);            	
+            }
+        }
+
+        void ReadBodyCallback(IAsyncResult result)
+        {
+            /*Message message = (Message)result.AsyncState;
+            Stream stream = Socket.GetStream();
+            try
+            {
+                int bytesRead = stream.EndRead(result);
+
+                if (bytesRead == message._buffer.Length)
+                {
+                    lock(messages)
+                        messages.Enqueue(message);
+                    Console.WriteLine("Packet was successfully received.");
+                    Console.WriteLine(message);
+
+                    StartRead();
                 }
                 else
                 {
-                    //it is end of stream
-                    stream.Dispose();
-                    Socket = null;
-                    Console.WriteLine("0 bytes read");
+                    stream.BeginRead(message.buffer, bytesRead, message.buffer.Length - bytesRead, new AsyncCallback(ReadBodyCallback), message);
                 }
             }
-            catch (IOException ex)
+            catch(Exception ex)
             {
-                Console.WriteLine("CONESCTION LOST");
+                Console.WriteLine("PIZDEC:");
                 Console.WriteLine(ex.Message);
-            }
+            }*/
         }
     }
 }

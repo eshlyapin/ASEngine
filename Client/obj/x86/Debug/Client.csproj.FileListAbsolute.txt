@@ -8,3 +8,8 @@ D:\Coding\ProfolGIT\Client\bin\Debug\Client.pdb
 D:\Coding\ProfolGIT\Client\obj\x86\Debug\ResolveAssemblyReference.cache
 D:\Coding\ProfolGIT\Client\obj\x86\Debug\Client.exe
 D:\Coding\ProfolGIT\Client\obj\x86\Debug\Client.pdb
+D:\Program Files\porgit\Client\bin\Debug\Client.exe
+D:\Program Files\porgit\Client\bin\Debug\Client.pdb
+D:\Program Files\porgit\Client\obj\x86\Debug\ResolveAssemblyReference.cache
+D:\Program Files\porgit\Client\obj\x86\Debug\Client.exe
+D:\Program Files\porgit\Client\obj\x86\Debug\Client.pdb

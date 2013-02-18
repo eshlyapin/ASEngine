@@ -8,3 +8,8 @@ D:\Coding\ProfolGIT\Profol\obj\x86\Debug\Profol.pdb
 D:\Coding\ProfolGIT\Profol\obj\x86\Debug\ResolveAssemblyReference.cache
 D:\Coding\ProfolGIT\Profol\bin\Debug\Profol.exe
 D:\Coding\ProfolGIT\Profol\bin\Debug\Profol.pdb
+D:\Program Files\porgit\Profol\obj\x86\Debug\Profol.exe
+D:\Program Files\porgit\Profol\obj\x86\Debug\Profol.pdb
+D:\Program Files\porgit\Profol\bin\Debug\Profol.exe
+D:\Program Files\porgit\Profol\bin\Debug\Profol.pdb
+D:\Program Files\porgit\Profol\obj\x86\Debug\ResolveAssemblyReference.cache

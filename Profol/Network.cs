@@ -19,7 +19,7 @@ namespace Profol
         {
             try
             {
-                _listener = new TcpListener(IPAddress.Parse("127.0.0.1"), port);
+                _listener = new TcpListener(IPAddress.Any, port);
                 _listener.Start();
             }
             catch(Exception ex)
@@ -35,6 +35,7 @@ namespace Profol
             Client client = new Client(socket);
             lock(_clientList)
                 _clientList.Add(client);
+            Console.WriteLine("New connection");
             _listener.BeginAcceptTcpClient(new AsyncCallback(AcceptCallBack), null);
         }
 

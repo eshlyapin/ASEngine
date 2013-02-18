@@ -10,72 +10,122 @@ using System.IO;
 
 namespace Client
 {
-    class Client
-    {
-        public string Name;
-        public float x = 0;
-        public float y = 0;
-
-        public Client(string name, float x, float y)
-        {
-            Name = name;
-            this.x = x;
-            this.y = y;
-        }
-        public override string ToString()
-        {
-            return Name + " position{ " + x + ", " + y + " }";
-        }
-
-        public static bool operator ==(Client left, Client right)
-        {
-            return left.Name == right.Name;
-        }
-
-        public static bool operator !=(Client left, Client right)
-        {
-            return !(left == right);
-        }
-    }
-
     class Program
     {
-        static List<Client> _clientList = new List<Client>();
+        static void SendMessage(Stream stream, string type)
+        {
+            Random rnd = new Random();
+            Thread.Sleep(50);
+            byte[] mbuf;
+
+            if (type == "m1")
+            {
+                mbuf = new byte[6];
+                rnd.NextBytes(mbuf);
+                mbuf[0] = 1;
+            }
+            else if (type == "m2")
+            {
+                mbuf = new byte[11];
+                rnd.NextBytes(mbuf);
+                mbuf[0] = 2;
+            }
+            else if (type == "m3")
+            {
+                mbuf = new byte[16];
+                rnd.NextBytes(mbuf);
+                mbuf[0] = 3;
+            }
+            else if (type == "login")
+            {
+                string login = "eshlyapin";
+                string pswd = "ololo";
+
+                MemoryStream ms = new MemoryStream();
+                BinaryWriter bs = new BinaryWriter(ms);
+                bs.Write((byte)1);
+                bs.Write(login.Length + pswd.Length + 2);
+                bs.Write(login);
+                bs.Write(pswd);
+                mbuf = ms.ToArray();
+            }
+            else
+            {
+                mbuf = new byte[rnd.Next(1, 20)];
+                rnd.NextBytes(mbuf);
+                mbuf[0] = (byte)rnd.Next(1, 7);
+            }
+            try
+            {
+                stream.Write(mbuf, 0, mbuf.Length);
+                Console.Write("TYPE:" + mbuf[0]);
+                Console.Write(" DATA: ");
+                for (int i = 1; i < mbuf.Length; ++i)
+                {
+                    Console.Write(mbuf[i] + " ");
+                }
+                Console.WriteLine();
+                
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine("send fail");
+                Console.WriteLine(ex.Message);
+            }
+        }
 
         static void Main(string[] args)
         {
             TcpClient socket = new TcpClient();
             try
             {
-                socket.Connect("127.0.0.1", 1234);
+                Console.WriteLine("Enter host ip:");
+                string ip = Console.ReadLine();
+                socket.Connect(ip, 30000);
             }
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                Console.Read();
+                return;
             }
 
             Random rnd = new Random(DateTime.Now.Second);
 
-            int i = 0;
+            Console.WriteLine("Client application for testing");
+            Console.WriteLine("send command description:\n\t");
+            Console.WriteLine("send <message type> [ -r <repeat> ]");
+            Console.WriteLine("message types: m1, m2, m3");
+            Console.WriteLine("if message type is illegal, random data will be sent");
             while (true)
             {
-                i++;
-                byte[] buffer = new byte[9];
-                rnd.NextBytes(buffer);
-                socket.GetStream().Write(buffer, 0, buffer.Length);
-
-
-                if (Console.KeyAvailable == true)
+                string line = Console.ReadLine();
+                string[] command = line.Split(' ');
+                if (command.Length > 1)
                 {
-                    Console.WriteLine("Sended bytes: " + i * 9);
-
-                    foreach (var a in buffer)
-                        Console.Write(a + " ");
-
-                    Console.Read();
-                    socket.Close();
+                    if (command[0] == "send")
+                    {
+                        SendMessage(socket.GetStream(), command[1]);
+                        if (command.Length > 3)
+                        {
+                            if (command[2] == "-r")
+                            {
+                                try
+                                {
+                                    int count = Convert.ToInt32(command[3]);
+                                    for (int i = 0; i < count - 1; ++i)
+                                    {
+                                        SendMessage(socket.GetStream(), command[1]);
+                                    }
+                                }
+                                catch (System.Exception ex)
+                                {
+                                    Console.WriteLine("invalid format");
+                                }
+                            }
+                        }
+                    }
                 }
-                //Console.Read();//Thread.Sleep(500);
             }  
         }
     }
