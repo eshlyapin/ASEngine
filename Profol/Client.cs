@@ -11,52 +11,81 @@ namespace Profol
 {
     class Client
     {
-        public Queue<Message> messages = new Queue<Message>();
+        Queue<Message> _messages = new Queue<Message>();
+        TcpClient _tcpSocket;
 
-        AsyncReader reader;
+
+
+        class ClientState
+        {
+            public byte[] buffer = null;
+            public MessageHeader header = null;
+            public Message message = null;
+            public int offset = 0;
+        }
 
         public Client(TcpClient socket)
         {
-            reader = new AsyncReader(socket);
-            ReadNewPacket();
+            _tcpSocket = socket;
+            ReadNewMessage();
         }
 
-        void ReadNewPacket()
+        void ReadNewMessage()
         {
-            byte[] headerBuffer = new byte[MessageHeader.HeaderSize];
-            reader.BeginRead(headerBuffer, new MessageHandler(OnHeaderRead), null);
+            Stream stream = _tcpSocket.GetStream();
+            ClientState state = new ClientState();
+            state.buffer = new byte[MessageHeader.HeaderSize];
+            stream.BeginRead(state.buffer, state.offset, state.buffer.Length, ReadCallback, state);
         }
 
 
-        void OnHeaderRead(byte[] buffer, object state)
+        void ReadCallback(IAsyncResult result)
         {
+            Stream stream = _tcpSocket.GetStream();
+            ClientState state = (ClientState)result.AsyncState;
+
             try
             {
-                MessageHeader header = new MessageHeader((byte[])buffer);
-                byte[] bodyBuffer = new byte[header.PacketSize];
-                reader.BeginRead(bodyBuffer, OnBodyRead, header);
+                int bytesRead = stream.EndRead(result);
+                if (bytesRead == 0)
+                {
+                    Console.WriteLine("End of stream");
+                    _tcpSocket.Close();
+                    return;
+                }
+                else
+                {
+                    state.offset += bytesRead;
+                    if (state.offset < state.buffer.Length)
+                    {
+                        stream.BeginRead(state.buffer, state.offset, bytesRead, ReadCallback, state);
+                    }
+                    else
+                    {
+                        if (state.header == null)
+                        {
+                            state.header = new MessageHeader(state.buffer);
+                            state.buffer = new byte[state.header.PacketSize];
+                            state.offset = 0;
+                            stream.BeginRead(state.buffer, state.offset, state.buffer.Length - state.offset, ReadCallback, state);
+                        }
+                        else
+                        {
+                            Message message = MessageFactory.CreateMessage(state.header, state.buffer);
+                            lock(_messages)
+                                _messages.Enqueue(message);
+                            Console.WriteLine("Message Recieved");
+                            Console.WriteLine(message);
+                            ReadNewMessage();
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Client should be disconected: " + ex.Message);
-                reader._tcpSocet.Close();
-            }
-        }
-
-        void OnBodyRead(byte[] buffer, object state)
-        {
-            try
-            {
-                Message message = MessageFactory.CreateMessage((MessageHeader)state, buffer);
-                messages.Enqueue(message);
-                Console.WriteLine("Message Recieved:");
-                Console.WriteLine(message);
-                ReadNewPacket();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Client should be disconected: " + ex.Message);
-                reader._tcpSocet.Close();
+                Console.WriteLine("FAIL!");
+                Console.WriteLine(ex.Message);
+                _tcpSocket.Close();
             }
         }
     }

@@ -15,7 +15,6 @@ namespace Profol
                     return new MessageLogin(header, buffer);
                 default:
                     throw new ArgumentException("Illegal message type");
-                    return null;
             }
         }
     }

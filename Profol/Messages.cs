@@ -63,7 +63,6 @@ namespace Profol
         public override string ToString()
         {
             return base.ToString() + " LOGIN: " + Name + " PASSWORD: " + Password;
-        }
-        
+        }        
     }
 }
