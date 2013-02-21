@@ -11,7 +11,7 @@ namespace Profol
 {
     class Network
     {
-        TcpListener _listener;
+        TcpListener mListener;
 
         List<Client> _clientList = new List<Client>();
 
@@ -19,24 +19,24 @@ namespace Profol
         {
             try
             {
-                _listener = new TcpListener(IPAddress.Any, port);
-                _listener.Start();
+                mListener = new TcpListener(IPAddress.Any, port);
+                mListener.Start();
             }
             catch(Exception ex)
             {
                 throw ex;
             }
-            _listener.BeginAcceptTcpClient(new AsyncCallback(AcceptCallBack), null);
+            mListener.BeginAcceptTcpClient(new AsyncCallback(AcceptCallBack), null);
         }
 
         void AcceptCallBack(IAsyncResult result)
         {
-            TcpClient socket = _listener.EndAcceptTcpClient(result);
+            TcpClient socket = mListener.EndAcceptTcpClient(result);
             Client client = new Client(socket);
             lock(_clientList)
                 _clientList.Add(client);
             Console.WriteLine("New connection");
-            _listener.BeginAcceptTcpClient(new AsyncCallback(AcceptCallBack), null);
+            mListener.BeginAcceptTcpClient(new AsyncCallback(AcceptCallBack), null);
         }
 
  

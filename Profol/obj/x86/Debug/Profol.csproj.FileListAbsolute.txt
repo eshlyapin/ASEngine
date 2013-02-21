@@ -13,3 +13,8 @@ D:\Program Files\porgit\Profol\obj\x86\Debug\Profol.pdb
 D:\Program Files\porgit\Profol\bin\Debug\Profol.exe
 D:\Program Files\porgit\Profol\bin\Debug\Profol.pdb
 D:\Program Files\porgit\Profol\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Profol\obj\x86\Debug\Profol.exe
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Profol\obj\x86\Debug\Profol.pdb
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Profol\bin\Debug\Profol.exe
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Profol\bin\Debug\Profol.pdb
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Profol\obj\x86\Debug\ResolveAssemblyReference.cache

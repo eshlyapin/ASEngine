@@ -14,7 +14,7 @@ namespace Profol
 
         static void Main(string[] args)
         {
-            Network network = new Network(30000);
+            Network network = new Network(port: 30000);
             while (true)
             {
                 network.Update();
