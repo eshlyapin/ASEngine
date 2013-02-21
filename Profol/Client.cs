@@ -11,10 +11,8 @@ namespace Profol
 {
     class Client
     {
-        Queue<Message> _messages = new Queue<Message>();
-        TcpClient _tcpSocket;
-
-
+        Queue<Message> messages = new Queue<Message>();
+        TcpClient mTcpSocket;
 
         class ClientState
         {
@@ -26,22 +24,31 @@ namespace Profol
 
         public Client(TcpClient socket)
         {
-            _tcpSocket = socket;
+            mTcpSocket = socket;
             ReadNewMessage();
         }
 
         void ReadNewMessage()
         {
-            Stream stream = _tcpSocket.GetStream();
-            ClientState state = new ClientState();
-            state.buffer = new byte[MessageHeader.HeaderSize];
-            stream.BeginRead(state.buffer, state.offset, state.buffer.Length, ReadCallback, state);
+            Stream stream = Stream.Null;
+            try
+            {
+                stream = mTcpSocket.GetStream();
+                ClientState state = new ClientState();
+                state.buffer = new byte[MessageHeader.HeaderSize];
+                stream.BeginRead(state.buffer, state.offset, state.buffer.Length, ReadCallback, state);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                stream.Close();
+                mTcpSocket.Close();
+            }
         }
-
 
         void ReadCallback(IAsyncResult result)
         {
-            Stream stream = _tcpSocket.GetStream();
+            Stream stream = mTcpSocket.GetStream();
             ClientState state = (ClientState)result.AsyncState;
 
             try
@@ -50,7 +57,7 @@ namespace Profol
                 if (bytesRead == 0)
                 {
                     Console.WriteLine("End of stream");
-                    _tcpSocket.Close();
+                    mTcpSocket.Close();
                     return;
                 }
                 else
@@ -72,8 +79,8 @@ namespace Profol
                         else
                         {
                             Message message = MessageFactory.CreateMessage(state.header, state.buffer);
-                            lock(_messages)
-                                _messages.Enqueue(message);
+                            lock(messages)
+                                messages.Enqueue(message);
                             Console.WriteLine("Message Recieved");
                             Console.WriteLine(message);
                             ReadNewMessage();
@@ -85,7 +92,8 @@ namespace Profol
             {
                 Console.WriteLine("FAIL!");
                 Console.WriteLine(ex.Message);
-                _tcpSocket.Close();
+                stream.Close();
+                mTcpSocket.Close();
             }
         }
     }

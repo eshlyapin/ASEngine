@@ -20,7 +20,14 @@ namespace Profol
             _buffer = buffer;
 
             PacketType = _buffer[0];
-            PacketSize = BitConverter.ToUInt32(_buffer, 1);
+            try
+            {
+                PacketSize = BitConverter.ToUInt32(_buffer, 1);
+            }
+            catch (Exception ex)
+            {
+                //Is it necessary check ToUint32 exception here? If it can't appear at levels above.
+            }
             if(PacketSize > MAX_PACKET_SIZE)
                 throw new InvalidDataException("Size of packet more of:" + MAX_PACKET_SIZE);
         }
