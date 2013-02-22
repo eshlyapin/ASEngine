@@ -35,8 +35,6 @@ namespace Profol
             lock(mClientList)
                 mClientList.Add(client);
             Console.WriteLine("New connection");
-            mListener.BeginAcceptTcpClient(new AsyncCallback(AcceptCallBack), null);
-
             try
             {
                 mListener.BeginAcceptTcpClient(new AsyncCallback(AcceptCallBack), null);

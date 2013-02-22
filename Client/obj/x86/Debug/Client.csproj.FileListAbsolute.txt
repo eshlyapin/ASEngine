@@ -17,3 +17,8 @@ C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\obj\x86\Debug\Clie
 C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\obj\x86\Debug\Client.pdb
 D:\Program Files\porgit\Client\bin\Debug\Profol.exe
 D:\Program Files\porgit\Client\bin\Debug\Profol.pdb
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\bin\Debug\Client.exe
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\bin\Debug\Client.pdb
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\bin\Debug\Profol.exe
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\bin\Debug\Profol.pdb
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\obj\x86\Debug\ResolveAssemblyReference.cache

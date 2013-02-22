@@ -31,16 +31,6 @@ namespace Profol
             WriteNewMessage();
         }
 
-        public void PushMessage(Message item)
-        {
-            writeQueue.Enqueue(item);
-        }
-
-        public Message PullMessage()
-        {
-            return readQueue.Dequeue();
-        }
-
         protected void ReadNewMessage()
         {
             Stream stream = Stream.Null;
@@ -54,7 +44,7 @@ namespace Profol
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                mTcpSocket.Close();
+                CloseTcpSocket();
             }
         }
 
@@ -75,17 +65,18 @@ namespace Profol
 
                         byte[] buffer = ms.ToArray();
 
-                        stream.BeginWrite(buffer, 0, buffer.Length, WriteCallback, buffer);
+                        stream.BeginWrite(buffer, 0, buffer.Length, WriteCallback, buffer);                        
                     }
                 }
             }
             catch (System.Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                CloseTcpSocket();
             }
         }
 
-        void WriteCallback(IAsyncResult result)
+        protected void WriteCallback(IAsyncResult result)
         {
             Stream stream = mTcpSocket.GetStream();
             byte[] buffer = (byte[])result.AsyncState;
@@ -95,25 +86,25 @@ namespace Profol
                 stream.EndWrite(result);
                 WriteNewMessage();
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                CloseTcpSocket();
             }
-
         }
 
         protected void ReadCallback(IAsyncResult result)
         {
-            Stream stream = mTcpSocket.GetStream();
-            ClientState state = (ClientState)result.AsyncState;
-
             try
             {
+                Stream stream = mTcpSocket.GetStream();
+                ClientState state = (ClientState)result.AsyncState;
+
                 int bytesRead = stream.EndRead(result);
                 if (bytesRead == 0)
                 {
                     Console.WriteLine("End of stream");
-                    mTcpSocket.Close();
+                    CloseTcpSocket();
                     return;
                 }
                 else
@@ -151,6 +142,21 @@ namespace Profol
                 Console.WriteLine(ex.Message);
                 mTcpSocket.Close();
             }
+        }
+
+        public void PushMessage(Message item)
+        {
+            writeQueue.Enqueue(item);
+        }
+
+        public Message PullMessage()
+        {
+            return readQueue.Dequeue();
+        }
+
+        public void CloseTcpSocket()
+        {
+            this.mTcpSocket.Close();
         }
     }
 }
