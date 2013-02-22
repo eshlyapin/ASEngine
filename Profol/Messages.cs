@@ -6,30 +6,32 @@ using System.IO;
 
 namespace Profol
 {
-    class MessageHeader
+    public class MessageHeader
     {
         public byte PacketType { get; private set; }
         public uint PacketSize { get; private set; }
         public const uint HeaderSize = sizeof(byte) + sizeof(uint);
         public const uint MAX_PACKET_SIZE = 4096;
 
-        byte[] _buffer;
+        byte[] mBuffer;
 
         public MessageHeader(byte[] buffer)
         {
-            _buffer = buffer;
+            mBuffer = buffer;
+            using (MemoryStream stream = new MemoryStream(buffer))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                PacketType = reader.ReadByte();
+                PacketSize = reader.ReadUInt32();
 
-            PacketType = _buffer[0];
-            try
-            {
-                PacketSize = BitConverter.ToUInt32(_buffer, 1);
+                if (PacketSize > MAX_PACKET_SIZE)
+                    throw new InvalidDataException("Size of packet more of:" + MAX_PACKET_SIZE);
             }
-            catch (Exception ex)
-            {
-                //Is it necessary check ToUint32 exception here? If it can't appear at levels above.
-            }
-            if(PacketSize > MAX_PACKET_SIZE)
-                throw new InvalidDataException("Size of packet more of:" + MAX_PACKET_SIZE);
+        }
+
+        public byte[] ToBytes()
+        {
+            return (byte[])mBuffer.Clone();
         }
 
         public override string ToString()
@@ -38,19 +40,25 @@ namespace Profol
         }
     }
 
-    class Message
+    public class Message 
     {
-        protected MessageHeader _header;
-        protected byte[] _buffer;
+        public MessageHeader Header { get; protected set; }
+        protected byte[] mBuffer;
+
         public Message(MessageHeader header, byte[] buffer)
         {
-            _header = header;
-            _buffer = buffer;
+            Header = header;
+            mBuffer = buffer;
         }
 
         public override string ToString()
         {
-            return "MESSAGE: " + _header.ToString();
+            return "MESSAGE: " + Header.ToString();
+        }
+
+        public byte[] ToBytes()
+        {
+            return (byte[])mBuffer.Clone();
         }
     }
 
@@ -62,10 +70,14 @@ namespace Profol
         public MessageLogin(MessageHeader header, byte[] buffer)
             :base(header, buffer)
         {
-            BinaryReader reader = new BinaryReader(new MemoryStream(_buffer));
-            Name = reader.ReadString();
-            Password = reader.ReadString();
+            using (MemoryStream stream = new MemoryStream(mBuffer))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                Name = reader.ReadString();
+                Password = reader.ReadString();
+            }
         }
+
 
         public override string ToString()
         {

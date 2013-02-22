@@ -6,9 +6,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.IO;
+using Profol;
 
-
-namespace Client
+namespace nClient
 {
     class Program
     {
@@ -35,16 +35,15 @@ namespace Client
             Random rnd = new Random(DateTime.Now.Second);
 
 
+            Client client = new Client(socket);
+
+
             while (true)
             {
                 try
                 {
-                    //byte[] buffer = new byte[50];
-                    //rnd.NextBytes(buffer);
-                    byte[] buffer = LoginMessage();
-                    socket.GetStream().Write(buffer, 0, buffer.Length);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                 }
@@ -52,20 +51,6 @@ namespace Client
             }
         }
 
-        static byte[] LoginMessage()
-        {
-            string name = "ololo";
-            string password = "pswd";
-            int size = name.Length + password.Length + 2;
-            
-            MemoryStream stream = new MemoryStream();
-            BinaryWriter writer = new BinaryWriter(stream);
-            writer.Write((byte)1);
-            writer.Write(size);
-            writer.Write(name);
-            writer.Write(password);
 
-            return stream.ToArray();
-        }
     }
 }

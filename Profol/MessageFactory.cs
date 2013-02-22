@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Profol
 {
-    class MessageFactory
+    public class MessageFactory
     {
         public static Message CreateMessage(MessageHeader header, byte[] buffer)
         {

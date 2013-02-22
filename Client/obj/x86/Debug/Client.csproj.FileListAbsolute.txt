@@ -15,3 +15,5 @@ D:\Program Files\porgit\Client\obj\x86\Debug\Client.exe
 D:\Program Files\porgit\Client\obj\x86\Debug\Client.pdb
 C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\obj\x86\Debug\Client.exe
 C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\obj\x86\Debug\Client.pdb
+D:\Program Files\porgit\Client\bin\Debug\Profol.exe
+D:\Program Files\porgit\Client\bin\Debug\Profol.pdb
