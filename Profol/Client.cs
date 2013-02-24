@@ -28,12 +28,12 @@ namespace Profol
         {
             mTcpSocket = socket;
             ReadNewMessage();
-            WriteNewMessage();
         }
 
         public void PushMessage(Message item)
         {
             writeQueue.Enqueue(item);
+            WriteNewMessage();
         }
 
         public Message PullMessage()
@@ -48,7 +48,7 @@ namespace Profol
             {
                 stream = mTcpSocket.GetStream();
                 ClientState state = new ClientState();
-                state.buffer = new byte[MessageHeader.HeaderSize];
+                state.buffer = new byte[MessageHeader.HEADER_SIZE];
                 stream.BeginRead(state.buffer, state.offset, state.buffer.Length, ReadCallback, state);
             }
             catch (Exception ex)

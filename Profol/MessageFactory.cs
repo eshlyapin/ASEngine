@@ -12,10 +12,15 @@ namespace Profol
             switch (header.PacketType)
             {
                 case 1: // login
-                    return new MessageLogin(header, buffer);
+                    return new LoginMessage(header, buffer);
                 default:
                     throw new ArgumentException("Illegal message type");
             }
+        }
+
+        public static LoginMessage CreateLoginMessage(string username, string password)
+        {
+            return new LoginMessage(username, password);
         }
     }
 }

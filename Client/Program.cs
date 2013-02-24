@@ -40,14 +40,18 @@ namespace nClient
 
             while (true)
             {
+                Console.Read();
                 try
                 {
+                    string username = "jigurda";
+                    string password = "123456";
+                    Message login = MessageFactory.CreateLoginMessage(username, password);
+                    client.PushMessage(login);
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                 }
-                Console.Read();
             }
         }
 
