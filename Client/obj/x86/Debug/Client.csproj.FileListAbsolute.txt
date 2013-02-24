@@ -17,5 +17,13 @@ C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\obj\x86\Debug\Clie
 C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\obj\x86\Debug\Client.pdb
 D:\Program Files\porgit\Client\bin\Debug\Profol.exe
 D:\Program Files\porgit\Client\bin\Debug\Profol.pdb
+<<<<<<< HEAD
 D:\Coding\ProfolGIT\Client\bin\Debug\Profol.exe
 D:\Coding\ProfolGIT\Client\bin\Debug\Profol.pdb
+=======
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\bin\Debug\Client.exe
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\bin\Debug\Client.pdb
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\bin\Debug\Profol.exe
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\bin\Debug\Profol.pdb
+C:\Users\Aleksei\Documents\Visual Studio 2010\ASEngine\Client\obj\x86\Debug\ResolveAssemblyReference.cache
+>>>>>>> 7ed191735d7c7ea7ca8bdb0887736c9390d0eff3
