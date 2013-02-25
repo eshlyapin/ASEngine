@@ -30,7 +30,6 @@ namespace Profol
             ReadNewMessage();
         }
 
-<<<<<<< HEAD
         public void PushMessage(Message item)
         {
             writeQueue.Enqueue(item);
@@ -42,8 +41,6 @@ namespace Profol
             return readQueue.Dequeue();
         }
 
-=======
->>>>>>> 7ed191735d7c7ea7ca8bdb0887736c9390d0eff3
         protected void ReadNewMessage()
         {
             Stream stream = Stream.Null;
@@ -155,16 +152,6 @@ namespace Profol
                 Console.WriteLine(ex.Message);
                 mTcpSocket.Close();
             }
-        }
-
-        public void PushMessage(Message item)
-        {
-            writeQueue.Enqueue(item);
-        }
-
-        public Message PullMessage()
-        {
-            return readQueue.Dequeue();
         }
 
         public void CloseTcpSocket()
