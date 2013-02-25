@@ -1,0 +1,5 @@
+*.suo
+Profol/bin/
+Profol/obj/
+Client/bin/
+Client/obj/
