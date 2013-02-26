@@ -13,6 +13,7 @@ namespace Profol
     {
         Queue<Message> readQueue = new Queue<Message>();
         Queue<Message> writeQueue = new Queue<Message>();
+        volatile bool canWrite = true;
 
         TcpClient mTcpSocket;
 
@@ -32,13 +33,20 @@ namespace Profol
 
         public void PushMessage(Message item)
         {
-            writeQueue.Enqueue(item);
-            WriteNewMessage();
+            lock(writeQueue)
+                writeQueue.Enqueue(item);
+            if (canWrite)
+            {
+                WriteNewMessage();
+            }
         }
 
         public Message PullMessage()
         {
-            return readQueue.Dequeue();
+            lock (readQueue)
+            {
+                return readQueue.Dequeue();
+            }
         }
 
         protected void ReadNewMessage()
@@ -62,20 +70,15 @@ namespace Profol
         {
             try
             {
-                if (writeQueue.Count > 0)
+                canWrite = false;
+                lock (writeQueue)
                 {
-                    Stream stream = mTcpSocket.GetStream();
-                    Message message = writeQueue.Dequeue();
-
-                    using(MemoryStream ms = new MemoryStream())
-                    using(BinaryWriter br = new BinaryWriter(ms))
+                    if (writeQueue.Count > 0)
                     {
-                        br.Write(message.Header.ToBytes());
-                        br.Write(message.ToBytes());
-
-                        byte[] buffer = ms.ToArray();
-
-                        stream.BeginWrite(buffer, 0, buffer.Length, WriteCallback, buffer);                        
+                        Stream stream = mTcpSocket.GetStream();
+                        Message message = writeQueue.Dequeue();                        
+                        byte[] buffer = message.ToBytes();
+                        stream.BeginWrite(buffer, 0, buffer.Length, WriteCallback, null);
                     }
                 }
             }
@@ -89,11 +92,11 @@ namespace Profol
         protected void WriteCallback(IAsyncResult result)
         {
             Stream stream = mTcpSocket.GetStream();
-            byte[] buffer = (byte[])result.AsyncState;
 
             try
             {
                 stream.EndWrite(result);
+                canWrite = true;
                 WriteNewMessage();
             }
             catch (Exception ex)

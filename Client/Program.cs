@@ -40,9 +40,10 @@ namespace nClient
 
             while (true)
             {
-                Console.Read();
+                Console.ReadLine();
                 try
                 {
+                    Console.WriteLine("SEND MESSGAE!");
                     string username = "jigurda";
                     string password = "123456";
                     Message login = MessageFactory.CreateLoginMessage(username, password);

@@ -54,5 +54,10 @@ namespace Profol
                 return stream.ToArray();
             }
         }
+
+        public override string ToString()
+        {
+            return "Message: " + Username + " : " + Password;
+        }
     }
 }

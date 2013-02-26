@@ -19,6 +19,11 @@ namespace Profol
 
         public MessageHeader(byte type, uint size)
         {
+            const uint maxPacketSize = 4096;
+
+            if(size > maxPacketSize)
+                throw new ArgumentOutOfRangeException("invalid size of packet");
+
             PacketType = type;
             PacketSize = size;
         }
