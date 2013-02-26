@@ -36,6 +36,13 @@ namespace nClient
 
 
             Client client = new Client(socket);
+            client.MessageReceived += (c, m) =>
+            {
+                if (m.Header.PacketType == 2)
+                {
+                    Console.WriteLine("Success login");
+                }
+            };
 
 
             while (true)
@@ -48,6 +55,7 @@ namespace nClient
                     string password = "123456";
                     Message login = MessageFactory.CreateLoginMessage(username, password);
                     client.PushMessage(login);
+                    //Console.WriteLine(client.PullMessage());
                 }
                 catch (Exception ex)
                 {

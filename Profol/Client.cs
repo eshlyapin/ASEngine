@@ -11,11 +11,13 @@ namespace Profol
 {
     public class Client
     {
-        Queue<Message> readQueue = new Queue<Message>();
         Queue<Message> writeQueue = new Queue<Message>();
         volatile bool canWrite = true;
 
         TcpClient mTcpSocket;
+
+        public delegate void MessageHandler(Client sender, Message message);
+        public event MessageHandler MessageReceived;
 
         class ClientState
         {
@@ -41,11 +43,12 @@ namespace Profol
             }
         }
 
-        public Message PullMessage()
+
+        protected void OnMessageReceived(Message message)
         {
-            lock (readQueue)
+            if (MessageReceived != null)
             {
-                return readQueue.Dequeue();
+                MessageReceived.Invoke(this, message);
             }
         }
 
@@ -70,11 +73,11 @@ namespace Profol
         {
             try
             {
-                canWrite = false;
                 lock (writeQueue)
                 {
                     if (writeQueue.Count > 0)
                     {
+                        canWrite = false;
                         Stream stream = mTcpSocket.GetStream();
                         Message message = writeQueue.Dequeue();                        
                         byte[] buffer = message.ToBytes();
@@ -140,11 +143,10 @@ namespace Profol
                         else
                         {
                             Message message = MessageFactory.CreateMessage(state.header, state.buffer);
-                            lock (readQueue)
-                                readQueue.Enqueue(message);
                             Console.WriteLine("Message Recieved");
                             Console.WriteLine(message);
                             ReadNewMessage();
+                            OnMessageReceived(message);
                         }
                     }
                 }

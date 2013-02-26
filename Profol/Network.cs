@@ -34,6 +34,9 @@ namespace Profol
             Client client = new Client(socket);
             lock(mClientList)
                 mClientList.Add(client);
+
+            client.MessageReceived += ProccessLogin;
+
             Console.WriteLine("New connection");
             try
             {
@@ -45,10 +48,14 @@ namespace Profol
             }
         }
 
- 
+        public void ProccessLogin(Client client, Message message)
+        {
+            if (message.Header.PacketType == 1)
+                client.PushMessage(new LoginSuccessMessage());
+        }
+
         public void Update()
         {
-
         }
     }
 }

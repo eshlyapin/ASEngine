@@ -44,9 +44,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
-    <Compile Include="Message.cs" />
-    <Compile Include="MessageFactory.cs" />
-    <Compile Include="MessageHeader.cs" />
+    <Compile Include="messages\LoginMessage.cs" />
+    <Compile Include="messages\LoginSuccessMessage.cs" />
+    <Compile Include="messages\Message.cs" />
+    <Compile Include="messages\MessageFactory.cs" />
+    <Compile Include="messages\MessageHeader.cs" />
     <Compile Include="Network.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
